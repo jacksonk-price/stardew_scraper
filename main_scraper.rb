@@ -21,13 +21,32 @@ def scrape_it
     $WAIT.until {
       $DRIVER.find_element(:class, 'catlinks')
     }
-    $DRIVER.find_elements(:id, 'infoboxdetail').each do |attr|
-      puts attr.text
-    end
-
+    collect_table_info
     print '[SUCCESS] '.green
     puts 'completed'
   end
+  $DRIVER.close
+end
+
+def collect_table_info
+  table = $DRIVER.find_element(:id, 'infoboxtable')
+  birthday = table.find_element(:xpath, '//tbody/tr[4]/td[2]').text
+  lives_in = table.find_element(:xpath, '//tbody/tr[5]/td[2]').text
+  address = table.find_element(:xpath, '//tbody/tr[6]/td[2]').text
+  family = table.find_element(:xpath, '//tbody/tr[7]/td[2]').text
+  marriage = table.find_element(:xpath, '//tbody/tr[8]/td[2]').text
+  clinic_visit = table.find_element(:xpath, '//tbody/tr[9]/td[2]').text
+  best_gifts = table.find_element(:xpath, '//tbody/tr[10]/td[2]').text
+
+  puts '*' * 30
+  puts birthday
+  puts lives_in
+  puts address
+  puts family
+  puts marriage
+  puts clinic_visit
+  puts best_gifts
+  puts '*' * 30
 end
 
 scrape_it

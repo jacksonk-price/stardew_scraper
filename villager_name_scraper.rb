@@ -14,6 +14,8 @@ def scrape_it
   $DRIVER.navigate.to(url)
   print '[INFO] '.blue
   puts "Navigating to #{url}..."
+  print '[INFO] '.blue
+  puts "Collecting villager names..."
   $WAIT.until {
     $DRIVER.find_element(:class, 'catlinks')
   }
@@ -25,6 +27,7 @@ def scrape_it
 
   print '[SUCCESS] '.green
   puts 'completed'
+  $DRIVER.close
 end
 
 scrape_it
