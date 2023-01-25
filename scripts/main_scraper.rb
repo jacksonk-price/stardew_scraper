@@ -24,54 +24,31 @@ def scrape_it
     $WAIT.until {
       $DRIVER.find_element(:class, 'catlinks')
     }
-    villager_info = collect_table_info
-    puts name
-    puts villager_info[:birthday]
-    puts villager_info[:lives_in]
-    puts villager_info[:address]
-    puts villager_info[:marriage]
-    villager = Villager.new(
-      name: name,
-      birthday: villager_info[:birthday],
-      lives_in: villager_info[:lives_in],
-      address: villager_info[:address],
-      marriage: villager_info[:marriage]
-    )
-    if villager.save
-      print '[SUCCESS] '.green
-      puts 'completed'
-    else
-      print '[ERROR] '.red
-      puts "issue saving #{name}"
-    end
+    save_villager_info
   end
   $DRIVER.close
 end
 
-def collect_table_info
-  villager_info = Hash.new
+def save_villager_info
   table = $DRIVER.find_element(:id, 'infoboxtable')
   birthday = table.find_element(:xpath, '//tbody/tr[4]/td[2]').text.strip
   lives_in = table.find_element(:xpath, '//tbody/tr[5]/td[2]').text.strip
   address = table.find_element(:xpath, '//tbody/tr[6]/td[2]').text.strip
-  # family = table.find_element(:xpath, '//tbody/tr[7]/td[2]').text
-  begin
-    marriage = table.find_element(:xpath, '//tbody/tr[8]/td[2]').text.strip
-  rescue Selenium::WebDriver::Error::NoSuchElementError
-    print '[WARNING] '.yellow
-    puts "issue saving "
-  end
-  # best_gifts = table.find_element(:xpath, '//tbody/tr[10]/td[2]').text
+  marriage = table.find_element(:xpath, '//tbody/tr[8]/td[2]').text.strip
 
-  villager_info[:birthday] = birthday
-  villager_info[:lives_in] = lives_in
-  villager_info[:address] = address
   if marriage == 'Yes'
-    villager_info[:marriage] = true
+    marriage = true
   else
-    villager_info[:marriage] = false
+    marriage = false
   end
-  villager_info
+
+  if Villager.create(name: name, birthday: birthday, lives_in: lives_in, address: address, marriage: marriage)
+    print '[SUCCESS]'.green
+    puts ' saved this villager...'
+  else
+    print '[ERROR]'.red
+    puts ' issue saving this villager...'
+  end
 end
 
 scrape_it
