@@ -1,26 +1,19 @@
 #!/usr/bin/env ruby
+ROOT_PATH = File.dirname(__dir__)
 require 'selenium-webdriver'
 require 'csv'
 require 'colorize'
 require 'active_record'
-require './villager.rb'
+require 'json'
+require "#{ROOT_PATH}/models/villager.rb"
+require "#{ROOT_PATH}/config/config.rb"
+require "#{ROOT_PATH}/config/db.rb"
 
-$OPTIONS = Selenium::WebDriver::Firefox::Options.new(args: ['-headless'])
-# $DRIVER = Selenium::WebDriver.for(:firefox, options: $OPTIONS)
-$DRIVER = Selenium::WebDriver.for :firefox
-$WAIT = Selenium::WebDriver::Wait.new(:timeout => 60)
 $NAMES = ["Alex", "Elliott", "Harvey", "Sam", "Sebastian", "Shane", "Abigail", "Emily", "Haley",
           "Leah", "Maru", "Penny", "Caroline", "Clint", "Demetrius", "Dwarf", "Evelyn", "George",
           "Gus", "Jas", "Jodi", "Kent", "Krobus", "Leo", "Lewis", "Linus", "Marnie", "Pam", "Pierre",
           "Robin", "Sandy", "Vincent", "Willy", "Wizard", "Birdie", "Bouncer", "Gil", "Governor", "Grandpa",
           "Gunther", "Henchman", "Marlon", "Morris", "Mr. Qi", "Professor Snail"]
-
-ActiveRecord::Base.establish_connection(
-  adapter:  'mysql2',
-  database: 'stardew_scraper',
-  username: 'root',
-  password: 'password'
-)
 
 def scrape_it
   $NAMES.each do |name|
@@ -36,7 +29,6 @@ def scrape_it
     puts villager_info[:birthday]
     puts villager_info[:lives_in]
     puts villager_info[:address]
-    puts villager_info[:clinic_visit]
     puts villager_info[:marriage]
     villager = Villager.new(
       name: name,
@@ -45,9 +37,13 @@ def scrape_it
       address: villager_info[:address],
       marriage: villager_info[:marriage]
     )
-    villager.save
-    print '[SUCCESS] '.green
-    puts 'completed'
+    if villager.save
+      print '[SUCCESS] '.green
+      puts 'completed'
+    else
+      print '[ERROR] '.red
+      puts "issue saving #{name}"
+    end
   end
   $DRIVER.close
 end
@@ -55,17 +51,26 @@ end
 def collect_table_info
   villager_info = Hash.new
   table = $DRIVER.find_element(:id, 'infoboxtable')
-  birthday = table.find_element(:xpath, '//tbody/tr[4]/td[2]').text
-  lives_in = table.find_element(:xpath, '//tbody/tr[5]/td[2]').text
-  address = table.find_element(:xpath, '//tbody/tr[6]/td[2]').text
+  birthday = table.find_element(:xpath, '//tbody/tr[4]/td[2]').text.strip
+  lives_in = table.find_element(:xpath, '//tbody/tr[5]/td[2]').text.strip
+  address = table.find_element(:xpath, '//tbody/tr[6]/td[2]').text.strip
   # family = table.find_element(:xpath, '//tbody/tr[7]/td[2]').text
-  marriage = table.find_element(:xpath, '//tbody/tr[8]/td[2]').text
+  begin
+    marriage = table.find_element(:xpath, '//tbody/tr[8]/td[2]').text.strip
+  rescue Selenium::WebDriver::Error::NoSuchElementError
+    print '[WARNING] '.yellow
+    puts "issue saving "
+  end
   # best_gifts = table.find_element(:xpath, '//tbody/tr[10]/td[2]').text
 
   villager_info[:birthday] = birthday
   villager_info[:lives_in] = lives_in
   villager_info[:address] = address
-  marriage == 'Yes' ? villager_info[:marriage] == true : villager_info[:marriage] == false
+  if marriage == 'Yes'
+    villager_info[:marriage] = true
+  else
+    villager_info[:marriage] = false
+  end
   villager_info
 end
 
