@@ -6,8 +6,8 @@ require 'colorize'
 require 'active_record'
 require 'json'
 require "#{ROOT_PATH}/models/villager.rb"
-require "#{ROOT_PATH}/config/config.rb"
-require "#{ROOT_PATH}/config/db.rb"
+require "#{ROOT_PATH}/lib/db_connection.rb"
+require "#{ROOT_PATH}/lib/globals.rb"
 
 $NAMES = ["Alex", "Elliott", "Harvey", "Sam", "Sebastian", "Shane", "Abigail", "Emily", "Haley",
           "Leah", "Maru", "Penny", "Caroline", "Clint", "Demetrius", "Dwarf", "Evelyn", "George",

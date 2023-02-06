@@ -1,2 +1,2 @@
-/config/config.json
-/config/db.rb
+/lib/config.json
+/lib/db_connection.rb

@@ -1,12 +1,11 @@
 #!/usr/bin/env ruby
+ROOT_PATH = File.dirname(__dir__)
 require 'selenium-webdriver'
 require 'csv'
 require 'colorize'
+require "#{ROOT_PATH}/lib/globals.rb"
 
-$OPTIONS = Selenium::WebDriver::Firefox::Options.new(args: ['-headless'])
-# $DRIVER = Selenium::WebDriver.for(:firefox, options: $OPTIONS)
-$DRIVER = Selenium::WebDriver.for :firefox
-$WAIT = Selenium::WebDriver::Wait.new(:timeout => 60)
+include Globals
 
 def scrape_it
   url = 'https://stardewvalleywiki.com/Villagers'
